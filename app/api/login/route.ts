@@ -11,16 +11,22 @@ export async function POST(request: Request) {
   const adminPassword = process.env.ADMIN_PASSWORD;
 
   if (!adminEmail || !adminPassword) {
-    return NextResponse.redirect(new URL("/login?error=config", request.url));
+    return NextResponse.redirect(new URL("/login?error=config", request.url), {
+      status: 303,
+    });
   }
 
   if (email !== adminEmail || password !== adminPassword) {
-    return NextResponse.redirect(new URL("/login?error=invalid", request.url));
+    return NextResponse.redirect(new URL("/login?error=invalid", request.url), {
+      status: 303,
+    });
   }
 
   const token = await createSessionToken(email);
 
-  const response = NextResponse.redirect(new URL("/dashboard", request.url));
+  const response = NextResponse.redirect(new URL("/dashboard", request.url), {
+    status: 303,
+  });
 
   response.cookies.set({
     name: SESSION_COOKIE_NAME,
