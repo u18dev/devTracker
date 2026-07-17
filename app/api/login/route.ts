@@ -31,7 +31,7 @@ export async function POST(request: Request) {
       Location: new URL("/dashboard", request.url).toString(),
       "Set-Cookie": `${SESSION_COOKIE_NAME}=${encodeURIComponent(
         token
-      )}; Path=/; Max-Age=28800; HttpOnly; SameSite=Lax; Secure`,
+      )}; Path=/; Max-Age=28800; HttpOnly; SameSite=Lax`,
     },
   });
 }
