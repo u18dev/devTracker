@@ -1,4 +1,4 @@
-import { createSessionToken } from "../../../lib/session";
+import { createSessionToken, SESSION_COOKIE_NAME } from "../../../lib/session";
 
 export async function GET() {
   return new Response("API LOGIN ROUTE IS LIVE", {
@@ -16,23 +16,31 @@ export async function POST(request: Request) {
   const adminPassword = process.env.ADMIN_PASSWORD;
 
   if (!adminEmail || !adminPassword) {
-    return Response.json(
-      { ok: false, error: "Admin login is not configured." },
-      { status: 500 }
-    );
+    return redirectTo("/login?error=config", request.url);
   }
 
   if (email !== adminEmail || password !== adminPassword) {
-    return Response.json(
-      { ok: false, error: "Invalid email or password." },
-      { status: 401 }
-    );
+    return redirectTo("/login?error=invalid", request.url);
   }
 
   const token = await createSessionToken(email);
 
-  return Response.json({
-    ok: true,
-    token,
+  return new Response(null, {
+    status: 303,
+    headers: {
+      Location: new URL("/dashboard", request.url).toString(),
+      "Set-Cookie": `${SESSION_COOKIE_NAME}=${encodeURIComponent(
+        token
+      )}; Path=/; Max-Age=28800; HttpOnly; SameSite=Lax; Secure`,
+    },
+  });
+}
+
+function redirectTo(path: string, baseUrl: string) {
+  return new Response(null, {
+    status: 303,
+    headers: {
+      Location: new URL(path, baseUrl).toString(),
+    },
   });
 }

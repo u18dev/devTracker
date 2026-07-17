@@ -1,63 +1,6 @@
-"use client";
-
-import { useState } from "react";
-
 export default function LoginForm() {
-  const [error, setError] = useState("");
-  const [debug, setDebug] = useState("");
-
-  async function handleLogin(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
-    setError("");
-    setDebug("Submitting to /api/login...");
-
-    const formData = new FormData(event.currentTarget);
-
-    const response = await fetch("/api/login", {
-      method: "POST",
-      body: formData,
-      credentials: "same-origin",
-    });
-
-    setDebug(`API response status: ${response.status}`);
-
-    const data = await response.json();
-
-    console.log("LOGIN API DATA:", data);
-    console.log("LOGIN API STATUS:", response.status);
-
-    if (!response.ok || !data.ok || !data.token) {
-    setError(data.error || "Login failed.");
-    return;
-    }
-
-            document.cookie =
-            "devicetrack_session=" +
-            encodeURIComponent(data.token) +
-            "; path=/; max-age=28800; SameSite=Lax";
-
-            console.log("COOKIE AFTER SET:", document.cookie);
-
-            window.location.href = "/dashboard";
-  }
-
   return (
     <section className="form-card" style={{ maxWidth: 460, width: "100%" }}>
-      <div
-        style={{
-          padding: "8px 12px",
-          borderRadius: 12,
-          background: "#dcfce7",
-          color: "#166534",
-          fontWeight: 800,
-          fontSize: 12,
-          marginBottom: 14,
-        }}
-      >
-        API LOGIN FLOW ACTIVE
-      </div>
-
       <div className="form-section-header">
         <div className="step-pill">
           <span className="step-number">DT</span>
@@ -73,11 +16,7 @@ export default function LoginForm() {
         </div>
       </div>
 
-      {error && <div className="form-alert form-alert-error">{error}</div>}
-
-      {debug && <div className="form-alert form-alert-success">{debug}</div>}
-
-      <form onSubmit={handleLogin} className="space-y-5">
+      <form action="/api/login" method="post" className="space-y-5">
         <div className="form-field">
           <label className="form-label" htmlFor="email">
             Email
