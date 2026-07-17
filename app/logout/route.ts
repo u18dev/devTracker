@@ -1,11 +1,17 @@
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
+import { NextResponse } from "next/server";
 import { SESSION_COOKIE_NAME } from "../../lib/session";
 
-export async function GET() {
-  const cookieStore = await cookies();
+export async function POST(request: Request) {
+  const response = NextResponse.redirect(new URL("/login", request.url), {
+    status: 303,
+  });
 
-  cookieStore.delete(SESSION_COOKIE_NAME);
+  response.cookies.set({
+    name: SESSION_COOKIE_NAME,
+    value: "",
+    path: "/",
+    maxAge: 0,
+  });
 
-  redirect("/login");
+  return response;
 }

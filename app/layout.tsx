@@ -53,7 +53,7 @@ export default function RootLayout({
               <Link className="sidebar-link" href="/reports">
                 📁 Reports
               </Link>
-              <Link className="sidebar-link" href="/logout">
+              <Link className="sidebar-link" href="/logout" prefetch={false}>
                 🚪 Logout
               </Link>
               <Link className="sidebar-link" href="/search">
