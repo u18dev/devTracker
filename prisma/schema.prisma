@@ -1,0 +1,275 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model AppUser {
+  id                Int              @id @default(autoincrement())
+  name              String           @db.VarChar(150)
+  email             String           @unique(map: "email") @db.VarChar(255)
+  role              AppUserRole      @default(TECH_STAFF)
+  isActive          Boolean          @default(true) @map("is_active")
+  createdAt         DateTime?        @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt         DateTime?        @default(now()) @updatedAt @map("updated_at") @db.Timestamp(0)
+  assignedCheckouts Assignment[]     @relation("AssignedBy")
+  returnedCheckins  Assignment[]     @relation("ReturnedBy")
+  uploadedDocuments DeviceDocument[]
+  deviceEvents      DeviceEvent[]
+
+  @@index([email], map: "idx_app_users_email")
+  @@index([role], map: "idx_app_users_role")
+  @@map("app_users")
+}
+
+model Person {
+  id             Int              @id @default(autoincrement())
+  schoolIdNumber String           @unique(map: "school_id_number") @map("school_id_number") @db.VarChar(50)
+  personType     PersonType       @map("person_type")
+  status         PersonStatus     @default(ACTIVE)
+  firstName      String           @map("first_name") @db.VarChar(100)
+  lastName       String           @map("last_name") @db.VarChar(100)
+  preferredName  String?          @map("preferred_name") @db.VarChar(100)
+  email          String?          @db.VarChar(255)
+  phone          String?          @db.VarChar(50)
+  grade          String?          @db.VarChar(20)
+  graduationYear Int?             @map("graduation_year")
+  roomNumber     String?          @map("room_number") @db.VarChar(50)
+  department     String?          @db.VarChar(150)
+  jobTitle       String?          @map("job_title") @db.VarChar(150)
+  notes          String?          @db.Text
+  createdAt      DateTime?        @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt      DateTime?        @default(now()) @updatedAt @map("updated_at") @db.Timestamp(0)
+  assignments    Assignment[]
+  documents      DeviceDocument[]
+  deviceEvents   DeviceEvent[]
+
+  @@index([schoolIdNumber], map: "idx_people_school_id")
+  @@index([lastName], map: "idx_people_last_name")
+  @@index([firstName], map: "idx_people_first_name")
+  @@index([personType], map: "idx_people_type")
+  @@index([status], map: "idx_people_status")
+  @@index([grade], map: "idx_people_grade")
+  @@map("people")
+}
+
+model Device {
+  id              Int              @id @default(autoincrement())
+  assetTag        String           @unique(map: "asset_tag") @map("asset_tag") @db.VarChar(100)
+  serialNumber    String?          @unique(map: "serial_number") @map("serial_number") @db.VarChar(150)
+  deviceType      String           @map("device_type") @db.VarChar(100)
+  brand           String?          @db.VarChar(100)
+  model           String?          @db.VarChar(150)
+  color           String?          @db.VarChar(50)
+  status          DeviceStatus     @default(AVAILABLE)
+  deviceCondition DeviceCondition  @default(GOOD) @map("device_condition")
+  location        String?          @db.VarChar(150)
+  cartName        String?          @map("cart_name") @db.VarChar(150)
+  roomNumber      String?          @map("room_number") @db.VarChar(50)
+  purchaseYear    Int?             @map("purchase_year")
+  purchaseDate    DateTime?        @map("purchase_date") @db.Date
+  warrantyEndDate DateTime?        @map("warranty_end_date") @db.Date
+  barcodeValue    String?          @unique(map: "barcode_value") @map("barcode_value") @db.VarChar(150)
+  qrCodeValue     String?          @unique(map: "qr_code_value") @map("qr_code_value") @db.VarChar(150)
+  hasCharger      Boolean          @default(false) @map("has_charger")
+  chargerTag      String?          @map("charger_tag") @db.VarChar(100)
+  notes           String?          @db.Text
+  createdAt       DateTime?        @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt       DateTime?        @default(now()) @updatedAt @map("updated_at") @db.Timestamp(0)
+  assignments     Assignment[]
+  documents       DeviceDocument[]
+  deviceEvents    DeviceEvent[]
+  repairs         RepairTicket[]
+
+  @@index([assetTag], map: "idx_devices_asset_tag")
+  @@index([serialNumber], map: "idx_devices_serial")
+  @@index([deviceType], map: "idx_devices_type")
+  @@index([status], map: "idx_devices_status")
+  @@index([deviceCondition], map: "idx_devices_condition")
+  @@index([location], map: "idx_devices_location")
+  @@index([roomNumber], map: "idx_devices_room")
+  @@index([cartName], map: "idx_devices_cart")
+  @@map("devices")
+}
+
+model Assignment {
+  id                 Int              @id @default(autoincrement())
+  deviceId           Int              @map("device_id")
+  personId           Int              @map("person_id")
+  assignedByUserId   Int?             @map("assigned_by_user_id")
+  returnedByUserId   Int?             @map("returned_by_user_id")
+  checkoutDate       DateTime         @default(now()) @map("checkout_date") @db.DateTime(0)
+  expectedReturnDate DateTime?        @map("expected_return_date") @db.DateTime(0)
+  returnDate         DateTime?        @map("return_date") @db.DateTime(0)
+  checkoutCondition  DeviceCondition  @map("checkout_condition")
+  returnCondition    DeviceCondition? @map("return_condition")
+  chargerIssued      Boolean          @default(false) @map("charger_issued")
+  chargerReturned    Boolean?         @map("charger_returned")
+  chargerCondition   DeviceCondition? @map("charger_condition")
+  status             AssignmentStatus @default(ACTIVE)
+  checkoutNotes      String?          @map("checkout_notes") @db.Text
+  returnNotes        String?          @map("return_notes") @db.Text
+  createdAt          DateTime?        @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt          DateTime?        @default(now()) @updatedAt @map("updated_at") @db.Timestamp(0)
+  assignedByUser     AppUser?         @relation("AssignedBy", fields: [assignedByUserId], references: [id], map: "fk_assignments_assigned_by")
+  device             Device           @relation(fields: [deviceId], references: [id], map: "fk_assignments_device")
+  person             Person           @relation(fields: [personId], references: [id], map: "fk_assignments_person")
+  returnedByUser     AppUser?         @relation("ReturnedBy", fields: [returnedByUserId], references: [id], map: "fk_assignments_returned_by")
+  documents          DeviceDocument[]
+
+  @@index([deviceId], map: "idx_assignments_device")
+  @@index([personId], map: "idx_assignments_person")
+  @@index([assignedByUserId], map: "idx_assignments_assigned_by")
+  @@index([returnedByUserId], map: "idx_assignments_returned_by")
+  @@index([status], map: "idx_assignments_status")
+  @@index([checkoutDate], map: "idx_assignments_checkout_date")
+  @@index([returnDate], map: "idx_assignments_return_date")
+  @@map("assignments")
+}
+
+model DeviceEvent {
+  id        Int             @id @default(autoincrement())
+  deviceId  Int             @map("device_id")
+  personId  Int?            @map("person_id")
+  userId    Int?            @map("user_id")
+  eventType DeviceEventType @map("event_type")
+  eventNote String?         @map("event_note") @db.Text
+  oldValue  String?         @map("old_value") @db.Text
+  newValue  String?         @map("new_value") @db.Text
+  createdAt DateTime?       @default(now()) @map("created_at") @db.Timestamp(0)
+  device    Device          @relation(fields: [deviceId], references: [id], onDelete: Cascade, map: "fk_device_events_device")
+  person    Person?         @relation(fields: [personId], references: [id], map: "fk_device_events_person")
+  user      AppUser?        @relation(fields: [userId], references: [id], map: "fk_device_events_user")
+
+  @@index([deviceId], map: "idx_device_events_device")
+  @@index([personId], map: "idx_device_events_person")
+  @@index([userId], map: "idx_device_events_user")
+  @@index([eventType], map: "idx_device_events_type")
+  @@index([createdAt], map: "idx_device_events_created_at")
+  @@map("device_events")
+}
+
+model DeviceDocument {
+  id               Int          @id @default(autoincrement())
+  deviceId         Int?         @map("device_id")
+  personId         Int?         @map("person_id")
+  assignmentId     Int?         @map("assignment_id")
+  uploadedByUserId Int?         @map("uploaded_by_user_id")
+  documentType     DocumentType @default(OTHER) @map("document_type")
+  fileName         String       @map("file_name") @db.VarChar(255)
+  fileUrl          String       @map("file_url") @db.Text
+  fileMimeType     String?      @map("file_mime_type") @db.VarChar(100)
+  fileSize         Int?         @map("file_size")
+  notes            String?      @db.Text
+  createdAt        DateTime?    @default(now()) @map("created_at") @db.Timestamp(0)
+  assignment       Assignment?  @relation(fields: [assignmentId], references: [id], map: "fk_device_documents_assignment")
+  device           Device?      @relation(fields: [deviceId], references: [id], map: "fk_device_documents_device")
+  person           Person?      @relation(fields: [personId], references: [id], map: "fk_device_documents_person")
+  uploadedByUser   AppUser?     @relation(fields: [uploadedByUserId], references: [id], map: "fk_device_documents_uploaded_by")
+
+  @@index([deviceId], map: "idx_device_documents_device")
+  @@index([personId], map: "idx_device_documents_person")
+  @@index([assignmentId], map: "idx_device_documents_assignment")
+  @@index([documentType], map: "idx_device_documents_type")
+  @@index([uploadedByUserId], map: "fk_device_documents_uploaded_by")
+  @@map("device_documents")
+}
+
+model RepairTicket {
+  id                Int              @id @default(autoincrement())
+  deviceId          Int              @map("device_id")
+  issueTitle        String           @map("issue_title") @db.VarChar(255)
+  issueDescription  String?          @map("issue_description") @db.Text
+  reportedDate      DateTime         @default(now()) @map("reported_date") @db.DateTime(0)
+  repairStartDate   DateTime?        @map("repair_start_date") @db.DateTime(0)
+  repairEndDate     DateTime?        @map("repair_end_date") @db.DateTime(0)
+  reportedCondition DeviceCondition  @map("reported_condition")
+  finalCondition    DeviceCondition? @map("final_condition")
+  repairVendor      String?          @map("repair_vendor") @db.VarChar(150)
+  repairCost        Decimal?         @map("repair_cost") @db.Decimal(10, 2)
+  repairNotes       String?          @map("repair_notes") @db.Text
+  isResolved        Boolean          @default(false) @map("is_resolved")
+  createdAt         DateTime?        @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt         DateTime?        @default(now()) @updatedAt @map("updated_at") @db.Timestamp(0)
+  device            Device           @relation(fields: [deviceId], references: [id], map: "fk_repair_tickets_device")
+
+  @@index([deviceId], map: "idx_repair_tickets_device")
+  @@index([isResolved], map: "idx_repair_tickets_resolved")
+  @@index([reportedDate], map: "idx_repair_tickets_reported_date")
+  @@map("repair_tickets")
+}
+
+enum AppUserRole {
+  SUPER_ADMIN
+  ADMIN
+  TECH_STAFF
+  CHECKOUT_STAFF
+  VIEW_ONLY
+}
+
+enum PersonType {
+  STUDENT
+  STAFF
+}
+
+enum PersonStatus {
+  ACTIVE
+  INACTIVE
+  GRADUATED
+  TRANSFERRED
+  WITHDRAWN
+}
+
+enum DeviceStatus {
+  AVAILABLE
+  ASSIGNED
+  DAMAGED
+  LOST
+  STOLEN
+  IN_REPAIR
+  RETIRED
+}
+
+enum DeviceCondition {
+  NEW
+  GOOD
+  FAIR
+  DAMAGED
+  MISSING_PARTS
+  UNUSABLE
+}
+
+enum AssignmentStatus {
+  ACTIVE
+  RETURNED
+  OVERDUE
+  LOST
+  DAMAGED
+  STOLEN
+}
+
+enum DeviceEventType {
+  CREATED
+  UPDATED
+  ASSIGNED
+  RETURNED
+  MARKED_DAMAGED
+  MARKED_LOST
+  MARKED_STOLEN
+  SENT_TO_REPAIR
+  REPAIRED
+  MOVED_LOCATION
+  RETIRED
+  NOTE_ADDED
+  DOCUMENT_UPLOADED
+}
+
+enum DocumentType {
+  DEVICE_AGREEMENT
+  RETURN_FORM
+  DAMAGE_PHOTO
+  REPAIR_DOCUMENT
+  OTHER
+}

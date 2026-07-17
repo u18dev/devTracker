@@ -1,0 +1,26 @@
+# dependencies
+node_modules
+
+# next
+.next
+out
+
+# env / secrets
+.env
+.env.local
+.env.*.local
+
+# prisma / logs
+*.log
+
+# OS
+.DS_Store
+
+# backups / database dumps
+*.sql
+*.dump
+*.backup
+
+# uploads/temp
+tmp
+temp
