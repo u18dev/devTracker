@@ -14,38 +14,71 @@ export default function LoginForm() {
   );
 
   return (
-    <form action="/api/login" method="post" className="form-card">
-  <div className="form-field">
-    <label className="form-label" htmlFor="email">
-      Email
-    </label>
-    <input
-      id="email"
-      name="email"
-      type="email"
-      className="form-input"
-      required
-      autoComplete="email"
-    />
-  </div>
+    <form action="/api/login" method="post" className="form-card form-section w-full max-w-md">
+      <div className="form-section-header">
+        <div>
+          <span className="step-pill">
+            <span className="step-number">1</span>
+            Secure Access
+          </span>
 
-  <div className="form-field">
-    <label className="form-label" htmlFor="password">
-      Password
-    </label>
-    <input
-      id="password"
-      name="password"
-      type="password"
-      className="form-input"
-      required
-      autoComplete="current-password"
-    />
-  </div>
+          <h1 className="form-section-title mt-3">
+            Sign in to DeviceTrack
+          </h1>
 
-  <button type="submit" className="btn btn-primary">
-    Login
-  </button>
-</form>
+          <p className="form-section-description">
+            Enter your admin login to access the inventory dashboard.
+          </p>
+        </div>
+      </div>
+
+      <div className="form-field">
+        <label className="form-label" htmlFor="email">
+          Email
+        </label>
+
+        <input
+          id="email"
+          name="email"
+          type="email"
+          className="form-input"
+          placeholder="admin@devicetrack.local"
+          autoComplete="email"
+          required
+        />
+      </div>
+
+      <div className="form-field">
+        <label className="form-label" htmlFor="password">
+          Password
+        </label>
+
+        <input
+          id="password"
+          name="password"
+          type="password"
+          className="form-input"
+          placeholder="Enter password"
+          autoComplete="current-password"
+          required
+        />
+      </div>
+
+      {state?.error && (
+        <p className="form-alert form-alert-error">
+          {state.error}
+        </p>
+      )}
+
+      <div className="form-actions">
+        <button
+          type="submit"
+          disabled={pending}
+          className="btn btn-primary w-full disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {pending ? "Signing in..." : "Sign In"}
+        </button>
+      </div>
+    </form>
   );
 }
