@@ -14,7 +14,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>
+      <body suppressHydrationWarning>
         <div className="app-shell">
           <aside className="sidebar">
             <Link href="/" className="sidebar-logo">
@@ -70,10 +70,13 @@ export default function RootLayout({
 
               <form action="/search">
                 <input
-                  name="q"
-                  className="topbar-search"
-                  placeholder="Search asset tag, serial, student ID..."
-                />
+                    name="q"
+                    className="topbar-search"
+                    placeholder="Search asset tag, serial, student ID..."
+                    autoComplete="off"
+                    spellCheck={false}
+                    suppressHydrationWarning
+                  />
               </form>
             </header>
 

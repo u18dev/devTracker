@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { SESSION_COOKIE_NAME, verifySessionToken } from "./lib/session";
 
-const publicPaths = [
-  "/login",
-  "/favicon.ico",
-];
+const publicPaths = ["/login", "/favicon.ico"];
 
 function isPublicPath(pathname: string) {
   if (publicPaths.includes(pathname)) return true;
@@ -13,7 +10,7 @@ function isPublicPath(pathname: string) {
   return false;
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (isPublicPath(pathname)) {
