@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createSessionToken, SESSION_COOKIE_NAME } from "../../lib/session";
+import { createSessionToken, SESSION_COOKIE_NAME } from "../../../lib/session";
 
 export async function POST(request: Request) {
   const formData = await request.formData();
