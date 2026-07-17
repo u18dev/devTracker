@@ -1,5 +1,11 @@
 import { createSessionToken, SESSION_COOKIE_NAME } from "../../../lib/session";
 
+export async function GET() {
+  return new Response("API LOGIN ROUTE IS LIVE", {
+    status: 200,
+  });
+}
+
 export async function POST(request: Request) {
   const formData = await request.formData();
 
@@ -10,38 +16,22 @@ export async function POST(request: Request) {
   const adminPassword = process.env.ADMIN_PASSWORD;
 
   if (!adminEmail || !adminPassword) {
-    return redirectWithStatus("/login?error=config", request.url);
+    return new Response("Admin login is not configured.", { status: 500 });
   }
 
   if (email !== adminEmail || password !== adminPassword) {
-    return redirectWithStatus("/login?error=invalid", request.url);
+    return new Response("Invalid email or password.", { status: 401 });
   }
 
   const token = await createSessionToken(email);
 
-  const redirectUrl = new URL("/dashboard", request.url);
-
-  const headers = new Headers();
-  headers.set("Location", redirectUrl.toString());
-
-  headers.append(
-    "Set-Cookie",
-    `${SESSION_COOKIE_NAME}=${encodeURIComponent(
-      token
-    )}; Path=/; Max-Age=${60 * 60 * 8}; HttpOnly; SameSite=Lax; Secure`
-  );
-
-  return new Response(null, {
-    status: 303,
-    headers,
-  });
-}
-
-function redirectWithStatus(path: string, baseUrl: string) {
-  return new Response(null, {
-    status: 303,
+  return new Response(JSON.stringify({ ok: true }), {
+    status: 200,
     headers: {
-      Location: new URL(path, baseUrl).toString(),
+      "Content-Type": "application/json",
+      "Set-Cookie": `${SESSION_COOKIE_NAME}=${encodeURIComponent(
+        token
+      )}; Path=/; Max-Age=${60 * 60 * 8}; HttpOnly; SameSite=Lax; Secure`,
     },
   });
 }

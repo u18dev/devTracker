@@ -4,34 +4,49 @@ import { useState } from "react";
 
 export default function LoginForm() {
   const [error, setError] = useState("");
+  const [debug, setDebug] = useState("");
 
   async function handleLogin(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setError("");
 
-    const form = event.currentTarget;
-    const formData = new FormData(form);
+    setError("");
+    setDebug("Submitting to /api/login...");
+
+    const formData = new FormData(event.currentTarget);
 
     const response = await fetch("/api/login", {
       method: "POST",
       body: formData,
       credentials: "same-origin",
-      redirect: "manual",
     });
 
-    console.log("Login response status:", response.status);
-    console.log("Login response location:", response.headers.get("location"));
+    setDebug(`API response status: ${response.status}`);
 
-    if (response.status === 303 || response.status === 200 || response.type === "opaqueredirect") {
+    if (response.ok) {
       window.location.href = "/dashboard";
       return;
     }
 
-    setError("Login failed. Check your email/password or server config.");
+    const text = await response.text();
+    setError(text || "Login failed.");
   }
 
   return (
     <section className="form-card" style={{ maxWidth: 460, width: "100%" }}>
+      <div
+        style={{
+          padding: "8px 12px",
+          borderRadius: 12,
+          background: "#dcfce7",
+          color: "#166534",
+          fontWeight: 800,
+          fontSize: 12,
+          marginBottom: 14,
+        }}
+      >
+        API LOGIN FLOW ACTIVE
+      </div>
+
       <div className="form-section-header">
         <div className="step-pill">
           <span className="step-number">DT</span>
@@ -48,6 +63,12 @@ export default function LoginForm() {
       </div>
 
       {error && <div className="form-alert form-alert-error">{error}</div>}
+
+      {debug && (
+        <div className="form-alert form-alert-success">
+          {debug}
+        </div>
+      )}
 
       <form onSubmit={handleLogin} className="space-y-5">
         <div className="form-field">
