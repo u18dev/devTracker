@@ -1,4 +1,3 @@
-import { NextResponse } from "next/server";
 import { createSessionToken, SESSION_COOKIE_NAME } from "../../../lib/session";
 
 export async function POST(request: Request) {
@@ -11,32 +10,38 @@ export async function POST(request: Request) {
   const adminPassword = process.env.ADMIN_PASSWORD;
 
   if (!adminEmail || !adminPassword) {
-    return NextResponse.redirect(new URL("/login?error=config", request.url), {
-      status: 303,
-    });
+    return redirectWithStatus("/login?error=config", request.url);
   }
 
   if (email !== adminEmail || password !== adminPassword) {
-    return NextResponse.redirect(new URL("/login?error=invalid", request.url), {
-      status: 303,
-    });
+    return redirectWithStatus("/login?error=invalid", request.url);
   }
 
   const token = await createSessionToken(email);
 
-  const response = NextResponse.redirect(new URL("/dashboard", request.url), {
+  const redirectUrl = new URL("/dashboard", request.url);
+
+  const headers = new Headers();
+  headers.set("Location", redirectUrl.toString());
+
+  headers.append(
+    "Set-Cookie",
+    `${SESSION_COOKIE_NAME}=${encodeURIComponent(
+      token
+    )}; Path=/; Max-Age=${60 * 60 * 8}; HttpOnly; SameSite=Lax; Secure`
+  );
+
+  return new Response(null, {
     status: 303,
+    headers,
   });
+}
 
-  response.cookies.set({
-  name: SESSION_COOKIE_NAME,
-  value: token,
-  httpOnly: true,
-  secure: process.env.NODE_ENV === "production",
-  sameSite: "lax",
-  path: "/",
-  maxAge: 60 * 60 * 8,
-});
-
-  return response;
+function redirectWithStatus(path: string, baseUrl: string) {
+  return new Response(null, {
+    status: 303,
+    headers: {
+      Location: new URL(path, baseUrl).toString(),
+    },
+  });
 }
