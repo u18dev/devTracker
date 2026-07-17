@@ -6,7 +6,7 @@ const publicPaths = ["/login", "/favicon.ico"];
 function isPublicPath(pathname: string) {
   if (publicPaths.includes(pathname)) return true;
   if (pathname.startsWith("/_next")) return true;
-  if (pathname.startsWith("/public")) return true;
+  if (pathname.startsWith("/api")) return true;
   return false;
 }
 
@@ -20,15 +20,13 @@ export async function proxy(request: NextRequest) {
   const token = request.cookies.get(SESSION_COOKIE_NAME)?.value;
 
   if (!token) {
-    const loginUrl = new URL("/login", request.url);
-    return NextResponse.redirect(loginUrl);
+    return NextResponse.redirect(new URL("/login", request.url));
   }
 
   const session = await verifySessionToken(token);
 
-  if (!session) {
-    const loginUrl = new URL("/login", request.url);
-    const response = NextResponse.redirect(loginUrl);
+  if (!session?.email) {
+    const response = NextResponse.redirect(new URL("/login", request.url));
     response.cookies.delete(SESSION_COOKIE_NAME);
     return response;
   }
@@ -37,5 +35,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!api/auth|_next/static|_next/image).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
 };
