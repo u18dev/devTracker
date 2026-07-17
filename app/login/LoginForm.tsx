@@ -29,9 +29,13 @@ export default function LoginForm() {
       return;
     }
 
-    document.cookie = `devicetrack_session=${encodeURIComponent(
-      data.token
-    )}; path=/; max-age=${60 * 60 * 8}; samesite=lax; secure`;
+            document.cookie = `devicetrack_session=${encodeURIComponent(
+        data.token
+        )}; path=/; max-age=${60 * 60 * 8}; samesite=lax`;
+
+        console.log("Cookie after login:", document.cookie);
+
+        window.location.href = "/dashboard";
 
     window.location.href = "/dashboard";
   }
