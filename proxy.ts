@@ -26,9 +26,7 @@ export async function proxy(request: NextRequest) {
   const session = await verifySessionToken(token);
 
   if (!session?.email) {
-    const response = NextResponse.redirect(new URL("/login", request.url));
-    response.cookies.delete(SESSION_COOKIE_NAME);
-    return response;
+    return NextResponse.redirect(new URL("/login", request.url));
   }
 
   return NextResponse.next();
