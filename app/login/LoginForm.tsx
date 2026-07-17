@@ -1,4 +1,35 @@
+"use client";
+
+import { useState } from "react";
+
 export default function LoginForm() {
+  const [error, setError] = useState("");
+
+  async function handleLogin(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError("");
+
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+
+    const response = await fetch("/api/login", {
+      method: "POST",
+      body: formData,
+      credentials: "same-origin",
+      redirect: "manual",
+    });
+
+    console.log("Login response status:", response.status);
+    console.log("Login response location:", response.headers.get("location"));
+
+    if (response.status === 303 || response.status === 200 || response.type === "opaqueredirect") {
+      window.location.href = "/dashboard";
+      return;
+    }
+
+    setError("Login failed. Check your email/password or server config.");
+  }
+
   return (
     <section className="form-card" style={{ maxWidth: 460, width: "100%" }}>
       <div className="form-section-header">
@@ -16,7 +47,9 @@ export default function LoginForm() {
         </div>
       </div>
 
-      <form action="/api/login" method="post" className="space-y-5">
+      {error && <div className="form-alert form-alert-error">{error}</div>}
+
+      <form onSubmit={handleLogin} className="space-y-5">
         <div className="form-field">
           <label className="form-label" htmlFor="email">
             Email
