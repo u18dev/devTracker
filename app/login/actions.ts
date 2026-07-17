@@ -33,15 +33,13 @@ export async function loginAction(
   const token = await createSessionToken(email);
   const cookieStore = await cookies();
 
-  cookieStore.set({
-  name: SESSION_COOKIE_NAME,
-  value: token,
-  httpOnly: true,
-  sameSite: "lax",
-  secure: true,
-  path: "/",
-  maxAge: 60 * 60 * 8,
-});
+  cookieStore.set(SESSION_COOKIE_NAME, token, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "lax",
+    path: "/",
+    maxAge: 60 * 60 * 8,
+  });
 
   redirect("/dashboard");
 }
