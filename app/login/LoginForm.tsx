@@ -24,20 +24,22 @@ export default function LoginForm() {
 
     const data = await response.json();
 
+    console.log("LOGIN API DATA:", data);
+    console.log("LOGIN API STATUS:", response.status);
+
     if (!response.ok || !data.ok || !data.token) {
-      setError(data.error || "Login failed.");
-      return;
+    setError(data.error || "Login failed.");
+    return;
     }
 
-            document.cookie = `devicetrack_session=${encodeURIComponent(
-        data.token
-        )}; path=/; max-age=${60 * 60 * 8}; samesite=lax`;
+            document.cookie =
+            "devicetrack_session=" +
+            encodeURIComponent(data.token) +
+            "; path=/; max-age=28800; SameSite=Lax";
 
-        console.log("Cookie after login:", document.cookie);
+            console.log("COOKIE AFTER SET:", document.cookie);
 
-        window.location.href = "/dashboard";
-
-    window.location.href = "/dashboard";
+            window.location.href = "/dashboard";
   }
 
   return (
