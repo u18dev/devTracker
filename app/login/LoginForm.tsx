@@ -22,13 +22,18 @@ export default function LoginForm() {
 
     setDebug(`API response status: ${response.status}`);
 
-    if (response.ok) {
-      window.location.href = "/dashboard";
+    const data = await response.json();
+
+    if (!response.ok || !data.ok || !data.token) {
+      setError(data.error || "Login failed.");
       return;
     }
 
-    const text = await response.text();
-    setError(text || "Login failed.");
+    document.cookie = `devicetrack_session=${encodeURIComponent(
+      data.token
+    )}; path=/; max-age=${60 * 60 * 8}; samesite=lax; secure`;
+
+    window.location.href = "/dashboard";
   }
 
   return (
@@ -64,11 +69,7 @@ export default function LoginForm() {
 
       {error && <div className="form-alert form-alert-error">{error}</div>}
 
-      {debug && (
-        <div className="form-alert form-alert-success">
-          {debug}
-        </div>
-      )}
+      {debug && <div className="form-alert form-alert-success">{debug}</div>}
 
       <form onSubmit={handleLogin} className="space-y-5">
         <div className="form-field">
