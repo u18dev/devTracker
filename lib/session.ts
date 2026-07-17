@@ -24,9 +24,11 @@ export async function verifySessionToken(token: string) {
   try {
     const { payload } = await jwtVerify(token, getSecret());
 
-    return {
-      email: String(payload.email || ""),
-    };
+    const email = String(payload.email || "");
+
+    if (!email) return null;
+
+    return { email };
   } catch {
     return null;
   }
