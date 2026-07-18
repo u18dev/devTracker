@@ -68,15 +68,15 @@ export default function RootLayout({
                 <div className="topbar-title">Campus Device Operations</div>
               </div>
 
-              <form action="/search">
+              <form action="/search" method="get">
                 <input
-                    name="q"
-                    className="topbar-search"
-                    placeholder="Search asset tag, serial, student ID..."
-                    autoComplete="off"
-                    spellCheck={false}
-                    suppressHydrationWarning
-                  />
+                  name="q"
+                  className="topbar-search"
+                  placeholder="Search asset tag, serial, student ID..."
+                  autoComplete="off"
+                  spellCheck={false}
+                  suppressHydrationWarning
+                />
               </form>
             </header>
 

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { prisma } from "../../lib/prisma";
+import StatusBadge from "../../components/StatusBadge";
 
 export default async function SearchPage({
   searchParams,
@@ -7,7 +8,7 @@ export default async function SearchPage({
   searchParams: Promise<{ q?: string }>;
 }) {
   const params = await searchParams;
-  const q = params.q?.trim() || "";
+  const q = String(params.q || "").trim();
 
   const devices = q
     ? await prisma.device.findMany({
@@ -20,7 +21,8 @@ export default async function SearchPage({
             { model: { contains: q } },
           ],
         },
-        take: 25,
+        orderBy: { updatedAt: "desc" },
+        take: 50,
       })
     : [];
 
@@ -32,82 +34,158 @@ export default async function SearchPage({
             { firstName: { contains: q } },
             { lastName: { contains: q } },
             { email: { contains: q } },
+            { roomNumber: { contains: q } },
+            { department: { contains: q } },
           ],
         },
-        take: 25,
+        orderBy: [{ lastName: "asc" }, { firstName: "asc" }],
+        take: 50,
       })
     : [];
 
   return (
-    <main className="p-8 space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Search</h1>
-        <p className="text-gray-600">
-          Search devices, students, staff, asset tags, serial numbers, and IDs.
-        </p>
-      </div>
-
-      <form className="flex max-w-2xl gap-3">
-        <input
-          name="q"
-          defaultValue={q}
-          placeholder="Search asset tag, serial, student ID, staff ID, name..."
-          className="flex-1 rounded-lg border px-3 py-2"
-        />
-
-        <button className="rounded-lg bg-black px-4 py-2 text-white">
-          Search
-        </button>
-      </form>
-
-      <section className="space-y-3">
-        <h2 className="text-xl font-semibold">Devices</h2>
-
-        <div className="rounded-xl border bg-white">
-          {devices.length === 0 ? (
-            <p className="p-4 text-gray-500">No device results.</p>
-          ) : (
-            devices.map((device) => (
-              <div key={device.id} className="border-t first:border-t-0 p-4">
-                <Link
-                  href={`/devices/${device.id}`}
-                  className="font-semibold text-blue-700 hover:underline"
-                >
-                  {device.assetTag}
-                </Link>
-                <p className="text-sm text-gray-600">
-                  {device.deviceType} • {device.brand || "-"}{" "}
-                  {device.model || ""} • Serial: {device.serialNumber || "-"} •{" "}
-                  Status: {device.status}
-                </p>
-              </div>
-            ))
-          )}
+    <main className="page space-y-6">
+      <section className="page-header">
+        <div>
+          <div className="eyebrow">Search</div>
+          <h1 className="page-title">Search Inventory</h1>
+          <p className="page-description">
+            Search devices, students, staff, tags, serial numbers, names, rooms,
+            and departments.
+          </p>
         </div>
       </section>
 
-      <section className="space-y-3">
-        <h2 className="text-xl font-semibold">Students / Staff</h2>
+      <section className="card card-pad">
+        <form action="/search" method="get" className="form-grid">
+          <div className="form-field">
+            <label className="form-label" htmlFor="q">
+              Search
+            </label>
+            <input
+              id="q"
+              name="q"
+              className="form-input scanner-input"
+              placeholder="Asset tag, serial, name, student ID..."
+              defaultValue={q}
+              autoComplete="off"
+            />
+          </div>
 
-        <div className="rounded-xl border bg-white">
-          {people.length === 0 ? (
-            <p className="p-4 text-gray-500">No student or staff results.</p>
-          ) : (
-            people.map((person) => (
-              <div key={person.id} className="border-t first:border-t-0 p-4">
-                <p className="font-semibold">
-                  {person.lastName}, {person.firstName}
-                </p>
-                <p className="text-sm text-gray-600">
-                  {person.personType} • ID: {person.schoolIdNumber}{" "}
-                  {person.grade ? `• Grade ${person.grade}` : ""}
-                  {person.roomNumber ? ` • Room ${person.roomNumber}` : ""}
-                </p>
-              </div>
-            ))
-          )}
-        </div>
+          <div className="form-field" style={{ justifyContent: "end" }}>
+            <label className="form-label">&nbsp;</label>
+            <button type="submit" className="btn btn-primary">
+              Search
+            </button>
+          </div>
+        </form>
       </section>
+
+      {!q && (
+        <section className="form-alert">
+          Enter a search term to find matching devices, students, or staff.
+        </section>
+      )}
+
+      {q && (
+        <>
+          <section className="card card-pad space-y-4">
+            <div>
+              <div className="eyebrow">Results</div>
+              <h2 className="text-xl font-black">People</h2>
+              <p className="text-sm text-gray-500">
+                {people.length} result{people.length === 1 ? "" : "s"} found.
+              </p>
+            </div>
+
+            <div className="table-wrap">
+              <table className="app-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Type</th>
+                    <th>Email</th>
+                    <th>Grade</th>
+                    <th>Room</th>
+                    <th>Department</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {people.length === 0 ? (
+                    <tr>
+                      <td colSpan={7}>No people found.</td>
+                    </tr>
+                  ) : (
+                    people.map((person) => (
+                      <tr key={person.id}>
+                        <td className="font-black">{person.schoolIdNumber}</td>
+                        <td>
+                          {person.lastName}, {person.firstName}
+                        </td>
+                        <td>{person.personType}</td>
+                        <td>{person.email || "-"}</td>
+                        <td>{person.grade || "-"}</td>
+                        <td>{person.roomNumber || "-"}</td>
+                        <td>{person.department || "-"}</td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section className="card card-pad space-y-4">
+            <div>
+              <div className="eyebrow">Results</div>
+              <h2 className="text-xl font-black">Devices</h2>
+              <p className="text-sm text-gray-500">
+                {devices.length} result{devices.length === 1 ? "" : "s"} found.
+              </p>
+            </div>
+
+            <div className="table-wrap">
+              <table className="app-table">
+                <thead>
+                  <tr>
+                    <th>Asset Tag</th>
+                    <th>Serial</th>
+                    <th>Type</th>
+                    <th>Brand</th>
+                    <th>Model</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {devices.length === 0 ? (
+                    <tr>
+                      <td colSpan={6}>No devices found.</td>
+                    </tr>
+                  ) : (
+                    devices.map((device) => (
+                      <tr key={device.id}>
+                        <td className="font-black">
+                          <Link href={`/devices/${device.id}`}>
+                            {device.assetTag}
+                          </Link>
+                        </td>
+                        <td>{device.serialNumber || "-"}</td>
+                        <td>{device.deviceType}</td>
+                        <td>{device.brand || "-"}</td>
+                        <td>{device.model || "-"}</td>
+                        <td>
+                          <StatusBadge status={device.status} />
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </>
+      )}
     </main>
   );
 }
