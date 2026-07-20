@@ -30,17 +30,17 @@ export default async function AssignmentDetailPage({
   }
 
   const events = await prisma.deviceEvent.findMany({
-    where: {
-      OR: [
-        { deviceId: assignment.deviceId },
-        { personId: assignment.personId },
-      ],
-    },
-    orderBy: {
-      eventDate: "desc",
-    },
-    take: 25,
-  });
+      where: {
+        OR: [
+          { deviceId: assignment.deviceId },
+          { personId: assignment.personId },
+        ],
+      },
+      orderBy: {
+        id: "desc",
+      },
+      take: 25,
+    });
 
   return (
     <main className="page space-y-6">
@@ -146,7 +146,6 @@ export default async function AssignmentDetailPage({
 
         <div className="form-grid">
           <Info label="Checkout Date" value={formatDateTime(assignment.checkoutDate)} />
-          <Info label="Due Date" value={assignment.dueDate ? formatDateTime(assignment.dueDate) : "-"} />
           <Info label="Return Date" value={assignment.returnDate ? formatDateTime(assignment.returnDate) : "-"} />
           <Info label="Checkout Condition" value={assignment.checkoutCondition || "-"} />
           <Info label="Return Condition" value={assignment.returnCondition || "-"} />
@@ -170,7 +169,7 @@ export default async function AssignmentDetailPage({
           <table className="app-table">
             <thead>
               <tr>
-                <th>Date</th>
+                <th>Event ID</th>
                 <th>Event</th>
                 <th>Note</th>
               </tr>
@@ -184,7 +183,7 @@ export default async function AssignmentDetailPage({
               ) : (
                 events.map((event) => (
                   <tr key={event.id}>
-                    <td>{formatDateTime(event.eventDate)}</td>
+                    <td>#{event.id}</td>
                     <td>{event.eventType}</td>
                     <td>{event.eventNote || "-"}</td>
                   </tr>

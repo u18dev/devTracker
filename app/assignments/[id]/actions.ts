@@ -35,7 +35,6 @@ export async function updateAssignment(
     formData.get("checkoutCondition") || ""
   ).trim();
   const chargerIssued = formData.get("chargerIssued") === "on";
-  const dueDateValue = String(formData.get("dueDate") || "").trim();
 
   try {
     const assignment = await prisma.assignment.findUnique({
@@ -57,7 +56,6 @@ export async function updateAssignment(
         checkoutNotes: checkoutNotes || null,
         checkoutCondition,
         chargerIssued,
-        dueDate: dueDateValue ? new Date(dueDateValue) : null,
       },
     });
 

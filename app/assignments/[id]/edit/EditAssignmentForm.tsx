@@ -8,7 +8,6 @@ type AssignmentWithRelations = {
   checkoutNotes: string | null;
   checkoutCondition: string;
   chargerIssued: boolean;
-  dueDate: Date | null;
   person: {
     firstName: string;
     lastName: string;
@@ -68,23 +67,6 @@ export default function EditAssignmentForm({
             <option value="MISSING_PARTS">Missing Parts</option>
             <option value="UNUSABLE">Unusable</option>
           </select>
-        </div>
-
-        <div className="form-field">
-          <label className="form-label" htmlFor="dueDate">
-            Due Date
-          </label>
-          <input
-            id="dueDate"
-            name="dueDate"
-            type="date"
-            className="form-input"
-            defaultValue={
-              assignment.dueDate
-                ? new Date(assignment.dueDate).toISOString().slice(0, 10)
-                : ""
-            }
-          />
         </div>
       </div>
 

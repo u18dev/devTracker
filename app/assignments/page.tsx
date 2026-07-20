@@ -92,14 +92,9 @@ export default async function AssignmentsPage({
     where: { status: "RETURNED" },
   });
 
-  const overdueCount = await prisma.assignment.count({
-    where: {
-      status: "ACTIVE",
-      dueDate: {
-        lt: new Date(),
-      },
-    },
-  });
+  const overdueCount = 0;
+
+  const totalCount = await prisma.assignment.count();
 
   return (
     <main className="page space-y-6">
@@ -136,8 +131,8 @@ export default async function AssignmentsPage({
         </div>
 
         <div className="stat-card">
-          <p className="stat-label">Overdue</p>
-          <p className="stat-value">{overdueCount}</p>
+          <p className="stat-label">Total Records</p>
+          <p className="stat-value">{totalCount}</p>
         </div>
 
         <div className="stat-card">
@@ -206,7 +201,6 @@ export default async function AssignmentsPage({
                 <th>Person</th>
                 <th>Device</th>
                 <th>Checkout</th>
-                <th>Due</th>
                 <th>Status</th>
                 <th>Charger</th>
                 <th>Actions</th>
@@ -241,10 +235,6 @@ export default async function AssignmentsPage({
                     </td>
 
                     <td>{formatDate(assignment.checkoutDate)}</td>
-
-                    <td>
-                      {assignment.dueDate ? formatDate(assignment.dueDate) : "-"}
-                    </td>
 
                     <td>
                       <AssignmentBadge status={assignment.status} />
