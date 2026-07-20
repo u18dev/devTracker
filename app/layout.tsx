@@ -26,37 +26,43 @@ export default function RootLayout({
             </Link>
 
             <nav className="sidebar-nav">
-              <Link className="sidebar-link primary" href="/issue-device">
+              <Link className="sidebar-link primary" href="/issue-device" prefetch={false}>
                 ⚡ Issue Device
               </Link>
-              <Link className="sidebar-link" href="/return-device">
+
+              <Link className="sidebar-link" href="/return-device" prefetch={false}>
                 ↩ Return Device
               </Link>
-              <Link className="sidebar-link" href="/dashboard">
+
+              <Link className="sidebar-link" href="/dashboard" prefetch={false}>
                 📊 Dashboard
               </Link>
-              <Link className="sidebar-link" href="/devices">
+
+              <Link className="sidebar-link" href="/devices" prefetch={false}>
                 💻 Devices
               </Link>
-              <Link className="sidebar-link" href="/students">
+
+              <Link className="sidebar-link" href="/students" prefetch={false}>
                 🎓 Students
               </Link>
-              <Link className="sidebar-link" href="/staff">
+
+              <Link className="sidebar-link" href="/staff" prefetch={false}>
                 🧑‍💼 Staff
               </Link>
-              <Link className="sidebar-link" href="/assignments">
+
+              <Link className="sidebar-link" href="/assignments" prefetch={false}>
                 🔗 Assignments
               </Link>
-              <Link className="sidebar-link" href="/mass-inventory">
+
+              <Link className="sidebar-link" href="/mass-inventory" prefetch={false}>
                 📦 Mass Inventory
               </Link>
-              <Link className="sidebar-link" href="/reports">
+
+              <Link className="sidebar-link" href="/reports" prefetch={false}>
                 📁 Reports
               </Link>
-              <Link className="sidebar-link" href="/logout" prefetch={false}>
-                🚪 Logout
-              </Link>
-              <Link className="sidebar-link" href="/search">
+
+              <Link className="sidebar-link" href="/search" prefetch={false}>
                 🔎 Search
               </Link>
             </nav>

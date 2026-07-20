@@ -11,12 +11,13 @@ const url = new URL(databaseUrl);
 
 const adapter = new PrismaMariaDb({
   host: url.hostname,
-  port: Number(url.port),
+  port: Number(url.port || 3306),
   user: decodeURIComponent(url.username),
   password: decodeURIComponent(url.password),
   database: url.pathname.replace("/", ""),
-  connectionLimit: 5,
-  connectTimeout: 20000,
+  connectionLimit: 1,
+  connectTimeout: 30000,
+  acquireTimeout: 30000,
   ssl: {
     rejectUnauthorized: false,
   },
@@ -32,6 +33,4 @@ export const prisma =
     adapter,
   });
 
-if (process.env.NODE_ENV !== "production") {
-  globalForPrisma.prisma = prisma;
-}
+globalForPrisma.prisma = prisma;
