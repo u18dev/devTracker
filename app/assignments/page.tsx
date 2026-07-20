@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 import Link from "next/link";
+import { AssignmentStatus, Prisma } from "@prisma/client";
 import { prisma } from "../../lib/prisma";
 
 export default async function AssignmentsPage({
@@ -10,14 +11,27 @@ export default async function AssignmentsPage({
   searchParams: Promise<{ status?: string; q?: string }>;
 }) {
   const params = await searchParams;
-  const status = params.status || "ACTIVE";
+
+  const selectedStatus = params.status || "ACTIVE";
   const q = String(params.q || "").trim();
 
-  const assignments = await prisma.assignment.findMany({
-    where: {
-      status: status === "ALL" ? undefined : status,
-      OR: q
-        ? [
+  const validStatuses: AssignmentStatus[] = [
+    "ACTIVE",
+    "RETURNED",
+    "LOST",
+    "DAMAGED",
+  ];
+
+  const statusFilter =
+    selectedStatus !== "ALL" && validStatuses.includes(selectedStatus as AssignmentStatus)
+      ? (selectedStatus as AssignmentStatus)
+      : undefined;
+
+  const where: Prisma.AssignmentWhereInput = {
+    ...(statusFilter ? { status: statusFilter } : {}),
+    ...(q
+      ? {
+          OR: [
             {
               person: {
                 schoolIdNumber: {
@@ -53,9 +67,13 @@ export default async function AssignmentsPage({
                 },
               },
             },
-          ]
-        : undefined,
-    },
+          ],
+        }
+      : {}),
+  };
+
+  const assignments = await prisma.assignment.findMany({
+    where,
     include: {
       person: true,
       device: true,
@@ -99,6 +117,7 @@ export default async function AssignmentsPage({
           <Link href="/issue-device" className="btn btn-primary" prefetch={false}>
             Issue Device
           </Link>
+
           <Link href="/return-device" className="btn btn-outline" prefetch={false}>
             Return Device
           </Link>
@@ -151,7 +170,7 @@ export default async function AssignmentsPage({
               id="status"
               name="status"
               className="form-select"
-              defaultValue={status}
+              defaultValue={selectedStatus}
             >
               <option value="ACTIVE">Active</option>
               <option value="RETURNED">Returned</option>
@@ -206,8 +225,7 @@ export default async function AssignmentsPage({
 
                     <td>
                       <div className="font-bold">
-                        {assignment.person.lastName},{" "}
-                        {assignment.person.firstName}
+                        {assignment.person.lastName}, {assignment.person.firstName}
                       </div>
                       <div className="text-xs text-gray-500">
                         {assignment.person.personType} ·{" "}
@@ -218,8 +236,7 @@ export default async function AssignmentsPage({
                     <td>
                       <div className="font-bold">{assignment.device.assetTag}</div>
                       <div className="text-xs text-gray-500">
-                        {assignment.device.brand || "-"}{" "}
-                        {assignment.device.model || ""}
+                        {assignment.device.brand || "-"} {assignment.device.model || ""}
                       </div>
                     </td>
 
