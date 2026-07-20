@@ -1,11 +1,29 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { DeviceCondition } from "@prisma/client";
 import { prisma } from "../../../lib/prisma";
 
 export type AssignmentActionState = {
   error?: string;
 };
+
+function parseDeviceCondition(value: string): DeviceCondition {
+  const allowed: DeviceCondition[] = [
+    "NEW",
+    "GOOD",
+    "FAIR",
+    "DAMAGED",
+    "MISSING_PARTS",
+    "UNUSABLE",
+  ];
+
+  if (allowed.includes(value as DeviceCondition)) {
+    return value as DeviceCondition;
+  }
+
+  return "GOOD";
+}
 
 export async function updateAssignment(
   assignmentId: number,
@@ -13,7 +31,9 @@ export async function updateAssignment(
   formData: FormData
 ): Promise<AssignmentActionState> {
   const checkoutNotes = String(formData.get("checkoutNotes") || "").trim();
-  const checkoutCondition = String(formData.get("checkoutCondition") || "").trim();
+  const checkoutConditionValue = String(
+    formData.get("checkoutCondition") || ""
+  ).trim();
   const chargerIssued = formData.get("chargerIssued") === "on";
   const dueDateValue = String(formData.get("dueDate") || "").trim();
 
@@ -27,11 +47,15 @@ export async function updateAssignment(
       return { error: "Assignment not found." };
     }
 
+    const checkoutCondition = checkoutConditionValue
+      ? parseDeviceCondition(checkoutConditionValue)
+      : assignment.checkoutCondition;
+
     await prisma.assignment.update({
       where: { id: assignmentId },
       data: {
         checkoutNotes: checkoutNotes || null,
-        checkoutCondition: checkoutCondition || assignment.checkoutCondition,
+        checkoutCondition,
         chargerIssued,
         dueDate: dueDateValue ? new Date(dueDateValue) : null,
       },
@@ -58,13 +82,17 @@ export async function returnAssignment(
   previousState: AssignmentActionState,
   formData: FormData
 ): Promise<AssignmentActionState> {
-  const returnCondition = String(formData.get("returnCondition") || "").trim();
+  const returnConditionValue = String(
+    formData.get("returnCondition") || ""
+  ).trim();
   const returnNotes = String(formData.get("returnNotes") || "").trim();
   const chargerReturned = formData.get("chargerReturned") === "on";
 
-  if (!returnCondition) {
+  if (!returnConditionValue) {
     return { error: "Return condition is required." };
   }
+
+  const returnCondition = parseDeviceCondition(returnConditionValue);
 
   try {
     await prisma.$transaction(async (tx) => {
