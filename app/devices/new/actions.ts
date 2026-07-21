@@ -6,8 +6,16 @@ import { prisma } from "../../../lib/prisma";
 export async function createDevice(formData: FormData) {
   const assetTag = String(formData.get("assetTag") || "").trim();
   const serialNumber = String(formData.get("serialNumber") || "").trim();
-  const deviceType = String(formData.get("deviceType") || "").trim();
-  const brand = String(formData.get("brand") || "").trim();
+  const selectedDeviceType = String(formData.get("deviceType") || "").trim();
+  const customDeviceType = String(formData.get("customDeviceType") || "").trim();
+
+  const selectedBrand = String(formData.get("brand") || "").trim();
+  const customBrand = String(formData.get("customBrand") || "").trim();
+
+  const deviceType =
+    selectedDeviceType === "__custom__" ? customDeviceType : selectedDeviceType;
+
+  const brand = selectedBrand === "__custom__" ? customBrand : selectedBrand;
   const model = String(formData.get("model") || "").trim();
   const location = String(formData.get("location") || "").trim();
   const roomNumber = String(formData.get("roomNumber") || "").trim();
@@ -15,6 +23,14 @@ export async function createDevice(formData: FormData) {
   const hasCharger = formData.get("hasCharger") === "on";
   const chargerTag = String(formData.get("chargerTag") || "").trim();
   const notes = String(formData.get("notes") || "").trim();
+
+    if (!deviceType) {
+    throw new Error("Device type is required.");
+  }
+
+  if (!brand) {
+    throw new Error("Brand is required.");
+  }
 
   if (!assetTag) {
     throw new Error("Asset tag is required.");

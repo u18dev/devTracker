@@ -1,113 +1,157 @@
-import Link from "next/link";
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
+import DeviceTypeBrandFields from "./DeviceTypeBrandFields";
+
 import { createDevice } from "./actions";
 
 export default function NewDevicePage() {
   return (
-    <main className="p-8 max-w-4xl space-y-6">
-      <div>
-        <Link href="/devices" className="text-sm text-gray-600 hover:underline">
-          ← Back to Devices
-        </Link>
+    <main className="page space-y-6">
+      <section className="page-header">
+        <div>
+          <div className="eyebrow">Inventory Intake</div>
+          <h1 className="page-title">Add Device</h1>
+          <p className="page-description">
+            Add a new device to inventory with type, brand, model, tag, serial,
+            condition, and status.
+          </p>
+        </div>
+      </section>
 
-        <h1 className="mt-3 text-3xl font-bold">Add Device</h1>
-        <p className="text-gray-600">
-          Add a Chromebook, laptop, iPad, hotspot, charger, or other school device.
-        </p>
-      </div>
+      <form action={createDevice} className="form-card space-y-5">
+        <div className="form-section-header">
+          <div className="step-pill">
+            <span className="step-number">1</span>
+            Device Info
+          </div>
 
-      <form action={createDevice} className="space-y-6 rounded-xl border p-6 bg-white">
-        <section className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <Field label="Asset Tag" name="assetTag" required />
-          <Field label="Serial Number" name="serialNumber" />
+          <div>
+            <div className="form-section-kicker">Core Details</div>
+            <h2 className="form-section-title">Device Identity</h2>
+            <p className="form-section-description">
+              Enter the device asset tag, serial number, type, brand, and model.
+            </p>
+          </div>
+        </div>
 
-          <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium" htmlFor="deviceType">
-              Device Type <span className="text-red-600">*</span>
+        <div className="form-grid">
+          <div className="form-field">
+            <label className="form-label" htmlFor="assetTag">
+              Asset Tag
+            </label>
+            <input
+              id="assetTag"
+              name="assetTag"
+              className="form-input scanner-input"
+              required
+              autoComplete="off"
+              placeholder="Scan or enter asset tag"
+            />
+          </div>
+
+          <div className="form-field">
+            <label className="form-label" htmlFor="serialNumber">
+              Serial Number
+            </label>
+            <input
+              id="serialNumber"
+              name="serialNumber"
+              className="form-input"
+              autoComplete="off"
+              placeholder="Serial number"
+            />
+          </div>
+        </div>
+
+        <DeviceTypeBrandFields />
+
+        <div className="form-grid">
+          <div className="form-field">
+            <label className="form-label" htmlFor="model">
+              Model
+            </label>
+            <input
+              id="model"
+              name="model"
+              className="form-input"
+              autoComplete="off"
+              placeholder="Example: 11 G9, 300e, Mission Darkness case"
+            />
+          </div>
+
+          <div className="form-field">
+            <label className="form-label" htmlFor="deviceCondition">
+              Condition
             </label>
             <select
-              id="deviceType"
-              name="deviceType"
-              required
-              className="rounded-lg border px-3 py-2"
-              defaultValue="Chromebook"
+              id="deviceCondition"
+              name="deviceCondition"
+              className="form-select"
+              defaultValue="GOOD"
             >
-              <option value="Chromebook">Chromebook</option>
-              <option value="Laptop">Laptop</option>
-              <option value="iPad">iPad</option>
-              <option value="Desktop">Desktop</option>
-              <option value="Hotspot">Hotspot</option>
-              <option value="Charger">Charger</option>
-              <option value="Monitor">Monitor</option>
-              <option value="Other">Other</option>
+              <option value="NEW">New</option>
+              <option value="GOOD">Good</option>
+              <option value="FAIR">Fair</option>
+              <option value="DAMAGED">Damaged</option>
+              <option value="MISSING_PARTS">Missing Parts</option>
+              <option value="UNUSABLE">Unusable</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="form-grid">
+          <div className="form-field">
+            <label className="form-label" htmlFor="status">
+              Status
+            </label>
+            <select
+              id="status"
+              name="status"
+              className="form-select"
+              defaultValue="AVAILABLE"
+            >
+              <option value="AVAILABLE">Available</option>
+              <option value="ASSIGNED">Assigned</option>
+              <option value="DAMAGED">Damaged</option>
+              <option value="LOST">Lost</option>
+              <option value="STOLEN">Stolen</option>
+              <option value="IN_REPAIR">In Repair</option>
+              <option value="RETIRED">Retired</option>
             </select>
           </div>
 
-          <Field label="Brand" name="brand" />
-          <Field label="Model" name="model" />
-          <Field label="Location" name="location" placeholder="Tech Office, Library, Cart A..." />
-          <Field label="Room Number" name="roomNumber" />
-          <Field label="Cart Name" name="cartName" />
-          <Field label="Charger Tag" name="chargerTag" />
-        </section>
+          <div className="form-field">
+            <label className="form-label" htmlFor="location">
+              Location
+            </label>
+            <input
+              id="location"
+              name="location"
+              className="form-input"
+              autoComplete="off"
+              placeholder="Example: Computer Lab, Storage, Room 101"
+            />
+          </div>
+        </div>
 
-        <label className="flex items-center gap-2 text-sm">
-          <input type="checkbox" name="hasCharger" className="h-4 w-4" />
-          This device includes a charger
-        </label>
-
-        <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium" htmlFor="notes">
+        <div className="form-field">
+          <label className="form-label" htmlFor="notes">
             Notes
           </label>
           <textarea
             id="notes"
             name="notes"
-            rows={4}
-            className="rounded-lg border px-3 py-2"
-            placeholder="Optional notes about condition, missing parts, labels, etc."
+            className="form-textarea"
+            placeholder="Optional notes"
           />
         </div>
 
-        <div className="flex gap-3">
-          <button
-            type="submit"
-            className="rounded-lg bg-black px-4 py-2 text-white"
-          >
-            Save Device
+        <div className="form-actions">
+          <button type="submit" className="btn btn-primary">
+            Add Device
           </button>
-
-          <Link href="/devices" className="rounded-lg border px-4 py-2">
-            Cancel
-          </Link>
         </div>
       </form>
     </main>
-  );
-}
-
-function Field({
-  label,
-  name,
-  required = false,
-  placeholder,
-}: {
-  label: string;
-  name: string;
-  required?: boolean;
-  placeholder?: string;
-}) {
-  return (
-    <div className="flex flex-col gap-1">
-      <label className="text-sm font-medium" htmlFor={name}>
-        {label} {required && <span className="text-red-600">*</span>}
-      </label>
-      <input
-        id={name}
-        name={name}
-        required={required}
-        placeholder={placeholder}
-        className="rounded-lg border px-3 py-2"
-      />
-    </div>
   );
 }
