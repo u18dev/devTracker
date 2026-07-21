@@ -27,6 +27,22 @@ export async function POST(request: Request) {
     const notes = String(body.notes || "").trim();
 
     if (!assetTag) {
+      return Response.json({ error: "Asset tag is required." }, { status: 400 });
+    }
+
+    if (!deviceType) {
+      return Response.json({ error: "Device type is required." }, { status: 400 });
+    }
+
+    if (!brand) {
+      return Response.json({ error: "Brand is required." }, { status: 400 });
+    }
+
+    if (!model) {
+      return Response.json({ error: "Model is required." }, { status: 400 });
+    }
+
+    if (!assetTag) {
       return NextResponse.json(
         { error: "Asset tag / barcode is required." },
         { status: 400 }

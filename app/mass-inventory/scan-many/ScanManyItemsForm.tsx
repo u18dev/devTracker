@@ -17,8 +17,13 @@ export default function ScanManyItemsForm() {
   const assetTagRef = useRef<HTMLInputElement | null>(null);
 
   const [deviceType, setDeviceType] = useState("Chromebook");
-  const [brand, setBrand] = useState("");
+  const [customDeviceType, setCustomDeviceType] = useState("");
+
+  const [brand, setBrand] = useState("HP");
+  const [customBrand, setCustomBrand] = useState("");
+
   const [model, setModel] = useState("");
+  const [customModel, setCustomModel] = useState("");
   const [deviceCondition, setDeviceCondition] = useState("GOOD");
   const [location, setLocation] = useState("Tech Office");
   const [roomNumber, setRoomNumber] = useState("");
@@ -43,56 +48,79 @@ export default function ScanManyItemsForm() {
     const cleanAssetTag = assetTag.trim();
     const cleanSerialNumber = serialNumber.trim();
 
+    const finalDeviceType =
+      deviceType === "__custom__" ? customDeviceType.trim() : deviceType.trim();
+
+    const finalBrand =
+      brand === "__custom__" ? customBrand.trim() : brand.trim();
+
+    const finalModel =
+      model === "__custom__" ? customModel.trim() : model.trim();
+
     if (!cleanAssetTag) {
       setError("Scan or enter an asset tag first.");
       return;
     }
 
-    if (!deviceType.trim()) {
+    if (!finalDeviceType) {
       setError("Device type is required.");
+      return;
+    }
+
+    if (!finalBrand) {
+      setError("Brand is required.");
+      return;
+    }
+
+    if (!finalModel) {
+      setError("Model is required.");
       return;
     }
 
     setSaving(true);
 
-    const res = await fetch("/api/devices/quick-add", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        assetTag: cleanAssetTag,
-        serialNumber: cleanSerialNumber,
-        deviceType,
-        brand,
-        model,
-        deviceCondition,
-        location,
-        roomNumber,
-        cartName,
-        hasCharger,
-        notes,
-      }),
-    });
+    try {
+      const res = await fetch("/api/devices/quick-add", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          assetTag: cleanAssetTag,
+          serialNumber: cleanSerialNumber,
+          deviceType: finalDeviceType,
+          brand: finalBrand,
+          model: finalModel,
+          deviceCondition,
+          location,
+          roomNumber,
+          cartName,
+          hasCharger,
+          notes,
+        }),
+      });
 
-    const data = await res.json();
+      const data = await res.json();
 
-    setSaving(false);
+      if (!res.ok) {
+        setError(data.error || "Device could not be added.");
+        return;
+      }
 
-    if (!res.ok) {
-      setError(data.error || "Device could not be added.");
-      return;
+      setAddedDevices((current) => [data.device, ...current]);
+      setSuccessMessage(`Added ${data.device.assetTag}`);
+
+      setAssetTag("");
+      setSerialNumber("");
+
+      requestAnimationFrame(() => {
+        assetTagRef.current?.focus();
+      });
+    } catch (error) {
+      setError("Device could not be added. Check your connection and try again.");
+    } finally {
+      setSaving(false);
     }
-
-    setAddedDevices((current) => [data.device, ...current]);
-    setSuccessMessage(`Added ${data.device.assetTag}`);
-
-    setAssetTag("");
-    setSerialNumber("");
-
-    requestAnimationFrame(() => {
-      assetTagRef.current?.focus();
-    });
   }
 
   function clearCurrentScan() {
@@ -132,29 +160,103 @@ export default function ScanManyItemsForm() {
           <div className="form-field">
             <label className="form-label" htmlFor="deviceType">
               Device Type
+              </label>
+
+              <select
+                id="deviceType"
+                value={deviceType}
+                onChange={(e) => setDeviceType(e.target.value)}
+                className="form-select"
+              >
+                <option value="Chromebook">Chromebook</option>
+                <option value="Laptop">Laptop</option>
+                <option value="HP Laptop">HP Laptop</option>
+                <option value="iPad">iPad</option>
+                <option value="Desktop">Desktop</option>
+                <option value="Hotspot">Hotspot</option>
+                <option value="Charger">Charger</option>
+                <option value="Monitor">Monitor</option>
+                <option value="Phone Case">Phone Case</option>
+                <option value="__custom__">+ Add new type</option>
+              </select>
+
+              {deviceType === "__custom__" && (
+                <input
+                  className="form-input"
+                  value={customDeviceType}
+                  onChange={(e) => setCustomDeviceType(e.target.value)}
+                  placeholder="Enter new device type"
+                  style={{ marginTop: 10 }}
+                  autoComplete="off"
+                />
+              )}
+            </div>
+
+          <div className="form-field">
+            <label className="form-label" htmlFor="brand">
+              Brand
             </label>
 
             <select
-              id="deviceType"
-              value={deviceType}
-              onChange={(e) => setDeviceType(e.target.value)}
+              id="brand"
+              value={brand}
+              onChange={(e) => setBrand(e.target.value)}
               className="form-select"
             >
-              <option value="Chromebook">Chromebook</option>
-              <option value="Laptop">Laptop</option>
-              <option value="iPad">iPad</option>
-              <option value="Desktop">Desktop</option>
-              <option value="Hotspot">Hotspot</option>
-              <option value="Charger">Charger</option>
-              <option value="Monitor">Monitor</option>
-              <option value="Other">Other</option>
+              <option value="HP">HP</option>
+              <option value="Lenovo">Lenovo</option>
+              <option value="Mission Darkness">Mission Darkness</option>
+              <option value="Apple">Apple</option>
+              <option value="Dell">Dell</option>
+              <option value="Acer">Acer</option>
+              <option value="__custom__">+ Add new brand</option>
             </select>
 
-            <p className="form-hint">Used for every item in this scan batch.</p>
+            {brand === "__custom__" && (
+              <input
+                className="form-input"
+                value={customBrand}
+                onChange={(e) => setCustomBrand(e.target.value)}
+                placeholder="Enter new brand"
+                style={{ marginTop: 10 }}
+                autoComplete="off"
+              />
+            )}
           </div>
+          <div className="form-field">
+            <label className="form-label" htmlFor="model">
+              Model
+            </label>
 
-          <ModernField label="Brand" value={brand} onChange={setBrand} />
-          <ModernField label="Model" value={model} onChange={setModel} />
+            <select
+              id="model"
+              value={model}
+              onChange={(e) => setModel(e.target.value)}
+              className="form-select"
+            >
+              <option value="">Select model</option>
+              <option value="HP Chromebook 11 G8">HP Chromebook 11 G8</option>
+              <option value="HP Chromebook 11 G9">HP Chromebook 11 G9</option>
+              <option value="HP Chromebook 11 G10">HP Chromebook 11 G10</option>
+              <option value="Lenovo 100e">Lenovo 100e</option>
+              <option value="Lenovo 300e">Lenovo 300e</option>
+              <option value="iPad 9th Gen">iPad 9th Gen</option>
+              <option value="iPad 10th Gen">iPad 10th Gen</option>
+              <option value="Mission Darkness Phone Case">Mission Darkness Phone Case</option>
+              <option value="__custom__">+ Add new model</option>
+            </select>
+
+            {model === "__custom__" && (
+              <input
+                className="form-input"
+                value={customModel}
+                onChange={(e) => setCustomModel(e.target.value)}
+                placeholder="Enter new model"
+                style={{ marginTop: 10 }}
+                autoComplete="off"
+              />
+            )}
+          </div>
 
           <div className="form-field">
             <label className="form-label" htmlFor="deviceCondition">
